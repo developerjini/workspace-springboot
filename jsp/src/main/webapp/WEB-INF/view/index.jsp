@@ -9,5 +9,6 @@
 </head>
 <body>
   <h1>Hello JSP / ${name}</h1>
+  <h1>time : ${time}</h1>
 </body>
 </html>
