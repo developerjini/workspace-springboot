@@ -23,4 +23,9 @@ public class HomeController {
     model.addAttribute("time", homeService.getTime());
     return "index";
   }
-}
+
+  @GetMapping("list")
+  public void getList(Model model) {
+    model.addAttribute("list", homeService.getList());
+  }}
+
