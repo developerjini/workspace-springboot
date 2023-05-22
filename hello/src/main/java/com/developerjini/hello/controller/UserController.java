@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.developerjini.hello.dto.ResponseDTO;
 import com.developerjini.hello.dto.UserDTO;
 import com.developerjini.hello.model.UserEntity;
+import com.developerjini.hello.security.TokenProvider;
 import com.developerjini.hello.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private TokenProvider tokenProvider;
 
   @PostMapping("signup")
   public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
@@ -48,7 +52,10 @@ public class UserController {
     UserEntity user = userService.getByCredentials(userDTO.getUsername(), userDTO.getPassword());
 
     if (user != null) {
-      final UserDTO responseUserDTO = UserDTO.builder().username(user.getUsername()).id(user.getId()).build();
+      // 토큰 생성
+      final String token = tokenProvider.create(user);
+      final UserDTO responseUserDTO = UserDTO.builder().username(user.getUsername()).id(user.getId()).token(token)
+          .build();
       return ResponseEntity.ok().body(responseUserDTO);
     } else {
       ResponseDTO responseDTO = ResponseDTO.builder().error("Login failed.").build();
