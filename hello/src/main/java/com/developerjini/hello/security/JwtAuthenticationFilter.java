@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -43,8 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 인증완료; SecurityContextHolder에 등록해야 인증된 사용자라고 생각한다.
         AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
             userId, // 인증된 사용자 정보, 문자열이 아니더라도 아무거나 넣을 수 있다. 보통 UserDetails라는 오브젝트를 넣는데 우리는 안만들었음
-            null // AuthorityUtils.NO_AUTHORITIES
-        );
+            null, AuthorityUtils.NO_AUTHORITIES);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);

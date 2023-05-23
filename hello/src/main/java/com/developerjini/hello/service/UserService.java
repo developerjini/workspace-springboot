@@ -1,6 +1,7 @@
 package com.developerjini.hello.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.developerjini.hello.model.UserEntity;
@@ -28,7 +29,20 @@ public class UserService {
     return userRepository.save(userEntity);
   }
 
-  public UserEntity getByCredentials(final String username, final String password) {
-    return userRepository.findByUsernameAndPassword(username, password);
+  // 로그인
+  public UserEntity getByCredentials(final String username, final String password, PasswordEncoder encoder) {
+    final UserEntity originalUser = userRepository.findByUsername(username);
+
+    // matches
+    // if (userEntity != null && encoder.matches(password,
+    // userEntity.getPassword())) {
+    // return userEntity;
+    // }
+    if (originalUser != null && encoder.matches(password, originalUser.getPassword())) {
+      return originalUser;
+    }
+
+    return null;
+    // return userRepository.findByUsernameAndPassword(username, password);
   }
 }
