@@ -8,12 +8,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.web.filter.CorsFilter;
 
 import com.developerjini.hello.security.JwtAuthenticationFilter;
+import com.developerjini.hello.security.OAuthUserServiceImpl;
+
+import lombok.extern.slf4j.Slf4j;
 
 @SuppressWarnings("deprecation") // 정보를 무시하라는 것
 @EnableWebSecurity
+@Slf4j
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Autowired
   private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+  @Autowired
+  private OAuthUserServiceImpl oAuthUserService; // 우리가 만든 OAuthUserServiceImpl 추가
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -33,8 +40,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .authenticated()
         .and()
         .oauth2Login()
-        .authorizationEndpoint()
-        .baseUri("/oauth2/auth"); // callback uri 설정 // oauth2Login 설정
+        .authorizationEndpoint().baseUri("/oauth2/auth")
+        .and()
+        .redirectionEndpoint()
+        .baseUri("/oauth2/callback/*") // callback uri 설정 // oauth2Login 설정
+        .and()
+        .userInfoEndpoint()
+        .userService(oAuthUserService); // OAuthUserServiceImpl를 유저서비스로 등록
 
     // filter 등록
     // 매 요청마다 CorsFilter 실행한 후에 jwtAuthenticationFilter를 실행한다.
