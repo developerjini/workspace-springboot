@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.developerjini.hello.model.UserEntity;
@@ -11,6 +12,7 @@ import com.developerjini.hello.model.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import javafx.application.Application;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -19,18 +21,33 @@ public class TokenProvider {
   private static final String SECRET_KEY = "1234";
 
   public String create(UserEntity userEntity) {
+    Date expriyDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
+
+    return Jwts.builder()
+        .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
+        .setSubject(userEntity.getId())
+        .setIssuer("demo app")
+        .setIssuedAt(new Date())
+        .setExpiration(expriyDate)
+        .compact();
+  }
+
+  public String create(final Authentication authentication) {
+    ApplicationOAuth2User userPrincipal = (ApplicationOAuth2User) authentication.getPrincipal();
     // 기한 지금으로부터 1일로 설정
     Date expiryDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
 
     // JWT Token 생성
     return Jwts.builder()
-        // header에 들어갈 내용 및 서명을 하기 위한 SECRET_KEY
-        .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
-        // payload에 들어갈 내용
-        .setSubject(userEntity.getId()) // sub
-        .setIssuer("demo app") // iss
+        .setSubject(userPrincipal.getName()) // id가 리턴됨
+        // // header에 들어갈 내용 및 서명을 하기 위한 SECRET_KEY
+        // .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
+        // // payload에 들어갈 내용
+        // .setSubject(userEntity.getId()) // sub
+        // .setIssuer("demo app") // iss
         .setIssuedAt(new Date()) // iat
         .setExpiration(expiryDate) // exp
+        .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
         .compact();
   }
 

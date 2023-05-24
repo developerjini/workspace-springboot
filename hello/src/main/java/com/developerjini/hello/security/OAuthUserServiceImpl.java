@@ -40,8 +40,15 @@ public class OAuthUserServiceImpl extends DefaultOAuth2UserService {
     }
 
     // 로그인 필드르 가져온다.
-    final String username = (String) oAuth2User.getAttributes().get("login");
+    // final String username = (String) oAuth2User.getAttributes().get("login");
     final String authProvider = userRequest.getClientRegistration().getClientName();
+
+    String username = null;
+    if (authProvider.equalsIgnoreCase("github")) {
+      username = (String) oAuth2User.getAttribute("login");
+    } else if (authProvider.equalsIgnoreCase("google")) {
+      username = (String) oAuth2User.getAttribute("email");
+    }
 
     UserEntity userEntity = null;
 
@@ -49,9 +56,12 @@ public class OAuthUserServiceImpl extends DefaultOAuth2UserService {
     if (!userRepository.existsByUsername(username)) {
       userEntity = UserEntity.builder().username(username).authProvider(authProvider).build();
       userEntity = userRepository.save(userEntity);
+    } else {
+      userEntity = userRepository.findByUsername(username);
     }
 
     log.info("Successfully pulled user info username {} authProvider {}", username, authProvider);
-    return oAuth2User;
+
+    return new ApplicationOAuth2User(userEntity.getId(), oAuth2User.getAttributes());
   }
 }
